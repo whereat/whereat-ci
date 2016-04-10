@@ -27,14 +27,14 @@ instance_groups:
     properties:
       external_url: https://ci.whereat.io # <-- changeable
       publicly_viewable: true
-      development_mode: true
-      # development_mode: true
-      # github_auth:
-      #   client_id: WHEREAT_CONCOURSE_GITHUB_CLIENT_ID
-      #   client_secret: WHEREAT_CONCOURSE_GITHUB_CLIENT_SECRET
-      #   authorize:
-      #     - organization: whereat
-      #       teams: [ops]
+      #development_mode: true
+      development_mode: false
+      github_auth:
+        client_id: WHEREAT_CONCOURSE_GITHUB_CLIENT_ID
+        client_secret: WHEREAT_CONCOURSE_GITHUB_CLIENT_SECRET
+        authorize:
+          - organization: whereat
+            teams: [ops]
       postgresql_database: &atc_db atc
   - name: tsa
     release: concourse

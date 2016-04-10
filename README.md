@@ -38,12 +38,17 @@ export WHEREAT_CONCOURSE_POSTGRES_PASSWORD=???
 
 ## Provision the Concourse Box
 
+Easy!
+
 ```shell
-$ cd ${WHEREAT_ROOT}/whereat-ci/scripts
+$ cd ${WHEREAT_ROOT}/whereat-ci/bosh
 $ ./deploy-bosh.sh
 $ ./provision-bosh.sh
+$ cd ../concourse
 $ ./deploy-concourse.sh
 ```
+
+(NOTE: Happy to compress the above into one script if anyone wants that. Personally, I like being able to separate the steps for easier trouble-shooting. -- @aguestuser)
 
 ## Configure a Load Balancer with SSL Termination
 
@@ -84,10 +89,43 @@ We're almost there! Now we just need to provide an interface to allow the outsid
 * create a `CNAME` DNS record on your domain pointing to the ELB
   * given the url `somereallylongurl.amazonaws.com` and the domain `example.com`, a successful DNS entry would look like this:
 
-    ```shell
+    ```
     ci.example.com. 1800 IN CNAME somereallylongurl.amazonaws.com.
     ```
 
-## Go use it!
+## Hello World
 
-If everything above worked, you should be able to go to `ci.example.com` and see a blue screen prompting you to install some pipelines!
+If everything above worked, you should be able to go to `ci.example.com` and see a blue screen prompting you to install some pipelines. Let's do that!
+
+First, make sure you've got the [fly CLI]([https://concourse.ci/fly-cli.html]) installed, then login with the following:
+
+```shell
+fly -t ci login -c https://ci.whereat.io
+```
+
+If you don't have your site's CA registered with your operating system, you *might* get an error of the form:
+
+```shell
+could not reach the Concourse server called ci:
+
+    Get https://ci.whereat.io/api/v1/info: x509: certificate signed by unknown authority
+```
+
+If so, you need to add the certificate for your site's CA to your operating system's list of recognized CA's. [This is how to do that on Ubuntu/Debian](http://superuser.com/questions/437330/how-do-you-add-a-certificate-authority-ca-to-ubuntu)
+
+Assuming `fly` can perform successful HTTPS authentication, you should now be prompted to authenticate with github through OAuth. Retrieve the OAuth token from your browser when prompted, and be sure to include the "Bearer" part when you copy and paste the token back into the CLI, or it won't work.
+
+Now upload and run the hello world pipeline with:
+
+```shell
+$ cd ${WHEREAT_ROOT}/whereat-ci/pipelines
+$ fly -t ci set-pipeline -p hello-world -c hello.yml
+$ fly -t ci unpause-pipeline -p hello-world
+```
+
+Huzzah! You're off to the races!
+
+# Todo
+
+* Configure outbound connections so `hello-world` will pass!
+* (Currently fails b/c it can't pull down the `ubuntu` image from dockerhub)
