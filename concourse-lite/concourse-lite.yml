@@ -21,8 +21,9 @@ instance_groups:
         name: atc
         properties:
           postgresql_database: &atc-db atc
-          external_url: http://10.244.8.2:8080
+          external_url: http://10.244.8.2:8080 # <-- DON'T CHANGE THIS!!!
           development_mode: true
+          publicly_viewable: true
       - release: concourse
         name: tsa
         properties: {}

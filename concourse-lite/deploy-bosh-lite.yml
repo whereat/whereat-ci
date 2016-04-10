@@ -19,14 +19,11 @@ vagrant ssh -c 'sudo iptables -t nat -A PREROUTING -p tcp -d $(curl -s http://16
 
 # Now we target our fresh installation of bosh-lite
 # The default user is admin/admin according to https://bosh.io/docs/director-users.html#default
-yes admin | bosh target $BOSH_AWS_ELASTIC_IP whereat-bosh-lite
+yes admin | bosh target $WHEREAT_BOSH_LITE_ELASTIC_IP whereat-bosh-lite
 
 # Use jq to detect matching releases of concourse and garden and upload them to the director
 curl -s https://api.github.com/repos/concourse/concourse/releases/latest | jq -r ".assets[].browser_download_url" | xargs -L1 bosh -t whereat-bosh-lite upload release
 
 # Upload the bosh-warden-boshlite stemcell
-bosh -t whereat-bosh-lite upload stemcell https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent
-
-# Deploy!
-bosh -t whereat-bosh-lite deployment concourse.yml
-bosh -t whereat-bosh-lite -n deploy
+bosh upload stemcell https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent;
+bosh stemcells;

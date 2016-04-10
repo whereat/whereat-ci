@@ -1,2 +1,4 @@
 */.vagrant/*
-concourse/concourse-aws.yml
+*/bosh.yml
+*/concourse.yml
+*/.tern-port
