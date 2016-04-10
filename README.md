@@ -31,19 +31,8 @@ Feel free to delete or replace occurrences of `WHEREAT_`, just note that you'll 
 export WHEREAT_BOSH_AWS_ACCESS_KEY_ID=???
 export WHEREAT_BOSH_AWS_ACCESS_KEY_SECRET=???
 export WHEREAT_BOSH_ELASTIC_IP=???
-export WHEREAT_BOSH_MBUS_URI=???
 export WHEREAT_BOSH_SUBNET_ID=???
 export WHEREAT_BOSH_SECURITY_GROUP=???
-export WHEREAT_BOSH_SECURITY_GROUP=???
-export WHEREAT_BOSH_KEYPAIR=???
-export WHEREAT_BOSH_PRIVATE_KEY_PATH=???
-export WHEREAT_AWS_REGION=???
-export WHEREAT_AWS_AVAILABILITY_ZONE=???
-export WHEREAT_BOSH_LITE_NAME=???
-export WHEREAT_BOSH_LITE_ELASTIC_IP=???
-export WHEREAT_CONCOURSE_GITHUB_CLIENT_ID=???
-export WHEREAT_CONCOURSE_GITHUB_CLIENT_SECRET=???
-export WHEREAT_CONCOURSE_ELASTIC_IP=???
 export WHEREAT_CONCOURSE_POSTGRES_PASSWORD=???
 ```
 
@@ -68,24 +57,30 @@ We're almost there! Now we just need to provide an interface to allow the outsid
   * name it `elb-concourse` (or what you will)
   * create it inside your bosh VPC
   * provide the following listener configurations:
+
     | Load Balancer Protocol | Load Balancer Port | Instance Protocol | Instance Port |
     |---|---|---|---|
     | HTTPS | 443 | HTTPS | 443 |
     | TCP | 2222 | TCP | 2222 |
+
   * Add the subnet associated with your bosh VPC (adding only one subnet is fine!)
   * create a `elb-concourse` security group with these inbound rules:
+
     | Type | Protocol | Port Range | Source |
     |---|---|---|---|
     | HTTPS | TCP | 443 | 0.0.0.0/0 |
     | Custom TCP Rule | TCP | 2222 | 0.0.0.0/0 |
+
   * use the x509 certificate you just created for SSL termination
   * associate the ELB with your `web/0` instance
 * create a `concourse` security group with following inbound rules:
+
     | Type | Protocol | Port Range | Source |
     |---|---|---|---|
     | HTTP | TCP | 80 | <id for elb-concourse security group> |
     | Custom TCP Rule | TCP | 8080 | <id for elb-concourse security group> |
     | Custom TCP Rule | TCP | 2222 | <id for elb-concourse security group> |
+
 * create a `CNAME` DNS record on your domain pointing to the ELB
   * given the url `somereallylongurl.amazonaws.com` and the domain `example.com`, a successful DNS entry would look like this:
 

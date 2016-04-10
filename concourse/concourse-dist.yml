@@ -25,7 +25,7 @@ instance_groups:
   - name: atc
     release: concourse
     properties:
-      external_url: http://WHEREAT_CONCOURSE_ELASTIC_IP # <-- replace
+      external_url: https://ci.whereat.io # <-- changeable
       publicly_viewable: true
       development_mode: true
       # development_mode: true
