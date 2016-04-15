@@ -1,4 +1,5 @@
-*/.vagrant/*
-*/bosh.yml
-*/concourse.yml
-*/.tern-port
+**/.vagrant/*
+**/bosh.yml
+**/concourse.yml
+**/.tern-port
+**/.env-ls

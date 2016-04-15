@@ -1,0 +1,4 @@
+#!/bin/bash
+# /var/go/loc-server-test
+
+env="DEVELOPMENT" cmd="test" loc-server-run-docker

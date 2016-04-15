@@ -1,0 +1,13 @@
+#!/bin/bash                                                                                              
+# /var/go/bin/loc-server-run-docker
+
+docker run \
+  --name whereat-location-server-assembly \
+  -e WHEREAT_ENVIRONMENT="$env" \
+  --env-file /var/go/.env-ls \
+  --rm \
+  -p 5000:5000 \
+  whereat/whereat-location-server:0.1 bash -c \
+  "cd whereat-location-server && sbt $cmd"
+
+chown -R go:go target
