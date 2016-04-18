@@ -1,13 +1,44 @@
-#!/bin/bash                                                                                           
-# /var/go/bin/loc-server-run-docker                                                                   
+#!/bin/bash                                                                                           # /var/go/bin/loc-server-run-docker                                                                   
+
+# CURRENTLY DEPRECATED because unable to solve below problem:                                         
+#  * PROBLEM: we need process that runs inside docker to export artifacts that `go` user on the agent can read/write/execute     
+#  * SO: we created a `go` user on the docker machine as part of `docker build`
+#    * BUT: the `go` user we hard coded is (definitionally) different than the one on our agent       
+#    * THUS: our agent winds up unable to modify `/var/go/.sbt/boot/sbt.boot.lock`                    
+#    * AND THUS: cannot run sbt commands                                                              
+#  * SO: we pased the go-agent's `go` user i to `docker run` with `-u $UID` instead of `-u go:go`     
+#    * BUT: this UID is not a recognized user on the docker machine                                   
+#    * SO: the docker machine references the user with an alias `?` (the semantics of which are unclea
+#    * AND: stores ivy and sbt files in `path/to/pipeline/?/.sbt` etc.. with owners `1000:ssh` (where 1000` is the UID of the `go` user on the go-agent)                                                    
+#    * AND FURTHER: these directories are owned by `root` (if chmoded to be owned by `go`, next run will change their owner back to `root`)                                                                 
+#    * THUS: the pipeline fails on every run after first because the initial cleanup phase tries to remove `whereat-location/server/?/.ivy2` and lacks permissions                                          
+# TOO BAD, because:                                                                                   
+#  * go-agent runs on java-7, and several of our application components use java-8                    
+#  * would be very nice to dockerize the application components we'd like to put under test           
+
+# in any case, this is what the script would have done:                                               
+
+# run docker container...                                                                             
 
 docker run \
-  --name "location-server-$cmd" \
-  --env-file /var/go/.env-ls \
-  --rm \
-  -e WHEREAT_ENVIRONMENT="$env" \
-  -u $UID:$(id -g $UID) \
-  -v $(pwd):/whereat-location-server \
-  -p 5000:5000 \
-  whereat/whereat-location-server:0.1 bash -c \
-  "cd whereat-location-server && sbt $cmd"
+    --name location-server-${name} \
+    --rm \
+    -e WHEREAT_ENVIRONMENT=${env} \
+    --env-file /var/go/env/docker/.location-server \
+    -v $(pwd):/whereat-location-server \
+    -u ${UID}:go \
+    -v /var/go/.ivy2:/whereat-location-server/\?/.ivy2 \
+    -v /var/go/.sbt:/whereat-location-server/\?/.sbt \
+    -p 5000:5000 \
+    whereat/location-server-gobox bash -c $cmd
+
+# ... with following properties:
+
+# * container name and WHEREAT_ENVIRONMENT set according to arguments passed to script                
+# * will be removed upon running (so this script is idempotent)                                       
+# * other environment variables picked up from local file                                             
+# * mounts host repo directory into container                                                         
+# * runs as `go` user, not `root` (so we can manipulate output artifacts)                             
+# * forwards port 5000 on the host to port 5000 in container (so app can get incoming traffic)        
+# * pulls latest version of base location server from dockerhub                                       
+# * invokes sbt command provided as argument in container's shell    

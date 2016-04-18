@@ -1,4 +1,4 @@
 #!/bin/bash
 # /var/go/loc-server-assemble
 
-env="PRODUCTION" cmd="assembly" loc-server-run-docker
+sbt assembly

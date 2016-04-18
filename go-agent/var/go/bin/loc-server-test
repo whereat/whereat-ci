@@ -1,4 +1,6 @@
-#!/bin/bash
-# /var/go/loc-server-test
+#!/bin/bash                                                                                            
+# /var/go/bin/loc-server-test                                                                          
 
-env="DEVELOPMENT" cmd="test" loc-server-run-docker
+export WHEREAT_ENVIRONMENT="TEST"
+source /var/go/env/.location-server
+sbt coverage test
